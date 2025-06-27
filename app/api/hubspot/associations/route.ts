@@ -1,10 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+// Helper function to extract domain from email
+function extractDomainFromEmail(email: string): string {
+  if (!email) return "";
+  const parts = email.split("@");
+  return parts.length === 2 ? parts[1].toLowerCase() : "";
+}
+
+// Helper function to extract domain from website URL
+function extractDomainFromWebsite(website: string): string {
+  if (!website) return "";
+
+  try {
+    const url = new URL(
+      website.startsWith("http") ? website : `https://${website}`
+    );
+    return url.hostname.replace("www.", "").toLowerCase();
+  } catch {
+    return website
+      .replace("www.", "")
+      .replace(/^https?:\/\//, "")
+      .toLowerCase();
+  }
+}
+
+export async function POST() {
   const logs: string[] = [];
 
   try {
-    const { associations } = await request.json();
     const apiKey = process.env.HUBSPOT_API_KEY;
 
     if (!apiKey) {
@@ -19,43 +42,179 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!associations || !Array.isArray(associations)) {
-      logs.push("❌ Associations array is required");
+    logs.push(
+      "🚀 Starting domain-based contact-company association process..."
+    );
+
+    // Step 1: Fetch the latest 100 companies from HubSpot
+    logs.push("📋 Fetching latest 100 companies from HubSpot...");
+    const companiesResponse = await fetch(
+      "https://api.hubapi.com/crm/v3/objects/companies?limit=100&properties=name,domain,website",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!companiesResponse.ok) {
+      const errorText = await companiesResponse.text();
+      logs.push(
+        `❌ Failed to fetch companies: Status ${companiesResponse.status} - ${errorText}`
+      );
       return NextResponse.json(
         {
-          error: "Associations array is required",
+          error: "Failed to fetch companies from HubSpot",
+          logs,
+        },
+        { status: 500 }
+      );
+    }
+
+    const companiesResult = await companiesResponse.json();
+    const companies = companiesResult.results || [];
+    logs.push(`✅ Fetched ${companies.length} companies from HubSpot`);
+
+    if (companies.length === 0) {
+      logs.push("❌ No companies found in HubSpot");
+      return NextResponse.json(
+        {
+          error:
+            "No companies found in HubSpot. Please create some companies first.",
           logs,
         },
         { status: 400 }
       );
     }
 
-    logs.push(
-      `🚀 Starting to create ${associations.length} contact-company associations...`
+    // Step 2: Fetch the latest 100 contacts from HubSpot
+    logs.push("📋 Fetching latest 100 contacts from HubSpot...");
+    const contactsResponse = await fetch(
+      "https://api.hubapi.com/crm/v3/objects/contacts?limit=100&properties=email,firstname,lastname",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
 
+    if (!contactsResponse.ok) {
+      const errorText = await contactsResponse.text();
+      logs.push(
+        `❌ Failed to fetch contacts: Status ${contactsResponse.status} - ${errorText}`
+      );
+      return NextResponse.json(
+        {
+          error: "Failed to fetch contacts from HubSpot",
+          logs,
+        },
+        { status: 500 }
+      );
+    }
+
+    const contactsResult = await contactsResponse.json();
+    const contacts = contactsResult.results || [];
+    logs.push(`✅ Fetched ${contacts.length} contacts from HubSpot`);
+
+    if (contacts.length === 0) {
+      logs.push("❌ No contacts found in HubSpot");
+      return NextResponse.json(
+        {
+          error:
+            "No contacts found in HubSpot. Please create some contacts first.",
+          logs,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Step 3: Find domain matches between contacts and companies
+    logs.push(
+      "🔍 Searching for domain matches between contacts and companies..."
+    );
+    const domainMatches = [];
+
+    for (const contact of contacts) {
+      const contactEmail = contact.properties?.email;
+      if (!contactEmail) {
+        logs.push(`⚠️ Contact ${contact.id} has no email address, skipping`);
+        continue;
+      }
+
+      const contactDomain = extractDomainFromEmail(contactEmail);
+      if (!contactDomain) {
+        logs.push(
+          `⚠️ Contact ${contact.id} has invalid email domain, skipping`
+        );
+        continue;
+      }
+
+      logs.push(
+        `🔍 Checking contact ${contact.id} (${contactEmail}) with domain: ${contactDomain}`
+      );
+
+      for (const company of companies) {
+        const companyDomain =
+          company.properties?.domain ||
+          extractDomainFromWebsite(company.properties?.website || "");
+
+        if (!companyDomain) {
+          continue; // Skip companies without domain info
+        }
+
+        if (contactDomain === companyDomain) {
+          logs.push(
+            `✅ Domain match found: Contact ${contact.id} (${contactEmail}) → Company ${company.id} (${company.properties?.name}) - Domain: ${contactDomain}`
+          );
+          domainMatches.push({
+            contactId: contact.id,
+            companyId: company.id,
+            contactEmail,
+            companyName: company.properties?.name,
+            domain: contactDomain,
+          });
+          break; // Found a match for this contact, move to next contact
+        }
+      }
+    }
+
+    logs.push(
+      `📊 Found ${domainMatches.length} domain matches out of ${contacts.length} contacts`
+    );
+
+    if (domainMatches.length === 0) {
+      logs.push("❌ No domain matches found between contacts and companies");
+      return NextResponse.json({
+        success: true,
+        message: "No domain matches found between contacts and companies",
+        domainMatches: [],
+        logs,
+        summary: {
+          totalContacts: contacts.length,
+          totalCompanies: companies.length,
+          matchesFound: 0,
+          associationsCreated: 0,
+        },
+      });
+    }
+
+    // Step 4: Create associations for domain matches
+    logs.push(
+      `🔗 Creating associations for ${domainMatches.length} domain matches...`
+    );
     const results = [];
     const errors = [];
 
-    for (const association of associations) {
+    for (const match of domainMatches) {
       try {
-        const { contactId, companyId } = association;
-
-        if (!contactId || !companyId) {
-          logs.push(
-            `❌ Invalid association data: contactId=${contactId}, companyId=${companyId}`
-          );
-          errors.push({
-            contactId,
-            companyId,
-            error: "Missing contactId or companyId",
-            success: false,
-          });
-          continue;
-        }
+        const { contactId, companyId } = match;
 
         logs.push(
-          `🔗 Creating association: Contact ${contactId} → Company ${companyId}`
+          `🔗 Creating association: Contact ${contactId} → Company ${companyId} (Domain: ${match.domain})`
         );
 
         const response = await fetch(
@@ -66,14 +225,12 @@ export async function POST(request: NextRequest) {
               Authorization: `Bearer ${apiKey}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              types: [
-                {
-                  associationCategory: "HUBSPOT_DEFINED",
-                  associationTypeId: 1, // 1 = Contact to Company association
-                },
-              ],
-            }),
+            body: JSON.stringify([
+              {
+                associationCategory: "HUBSPOT_DEFINED",
+                associationTypeId: 1, // 1 = Contact to Company association
+              },
+            ]),
           }
         );
 
@@ -84,6 +241,9 @@ export async function POST(request: NextRequest) {
           results.push({
             contactId,
             companyId,
+            contactEmail: match.contactEmail,
+            companyName: match.companyName,
+            domain: match.domain,
             success: true,
           });
         } else {
@@ -94,6 +254,9 @@ export async function POST(request: NextRequest) {
           errors.push({
             contactId,
             companyId,
+            contactEmail: match.contactEmail,
+            companyName: match.companyName,
+            domain: match.domain,
             error: errorText,
             success: false,
           });
@@ -105,8 +268,11 @@ export async function POST(request: NextRequest) {
           }`
         );
         errors.push({
-          contactId: association.contactId,
-          companyId: association.companyId,
+          contactId: match.contactId,
+          companyId: match.companyId,
+          contactEmail: match.contactEmail,
+          companyName: match.companyName,
+          domain: match.domain,
           error: error instanceof Error ? error.message : "Unknown error",
           success: false,
         });
@@ -119,13 +285,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      domainMatches,
       results,
       errors,
       logs,
       summary: {
-        total: associations.length,
-        successful: results.length,
-        failed: errors.length,
+        totalContacts: contacts.length,
+        totalCompanies: companies.length,
+        matchesFound: domainMatches.length,
+        associationsCreated: results.length,
+        associationsFailed: errors.length,
       },
     });
   } catch (error) {

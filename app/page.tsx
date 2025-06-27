@@ -8,18 +8,15 @@ import {
   generateContacts,
   generateCompanies,
   generateTickets,
-  generateAssociations,
   Contact,
   Company,
   Ticket,
-  Association,
 } from "@/lib/faker-data";
 
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [associations, setAssociations] = useState<Association[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isConfigured, setIsConfigured] = useState(false);
@@ -27,7 +24,7 @@ export default function Home() {
   const [apiLogs, setApiLogs] = useState<string[]>([]);
 
   // Define the tab types
-  const tabTypes = ["contacts", "companies", "tickets", "associations"];
+  const tabTypes = ["contacts", "companies", "tickets"];
 
   useEffect(() => {
     checkHubSpotConfig();
@@ -76,17 +73,7 @@ export default function Home() {
     setMessage(`${count} ${type} generated successfully!`);
   };
 
-  const generateAssociationsData = (count: number = 5) => {
-    const newAssociations = generateAssociations(contacts, companies, count);
-    setAssociations(newAssociations);
-    setMessage(
-      `${newAssociations.length} associations generated successfully!`
-    );
-  };
-
-  const sendToHubSpot = async (
-    type: "contacts" | "companies" | "tickets" | "associations"
-  ) => {
+  const associateContactsToCompanies = async () => {
     if (!isConfigured) {
       setMessage(
         "HubSpot API is not configured. Please set HUBSPOT_API_KEY environment variable."
@@ -99,7 +86,117 @@ export default function Home() {
     setApiLogs([]);
 
     try {
-      let data: Contact[] | Company[] | Ticket[] | Association[];
+      const response = await fetch("/api/hubspot/associations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.logs) {
+        console.log("=== HubSpot Contact-Company Associations API Logs ===");
+        result.logs.forEach((log: string) => {
+          console.log(log);
+        });
+        console.log("=== End Logs ===");
+        setApiLogs(result.logs);
+      }
+
+      if (result.success) {
+        setMessage(
+          `Successfully created ${
+            result.summary.associationsCreated
+          } contact-company associations! ${
+            result.summary.associationsFailed > 0
+              ? `${result.summary.associationsFailed} failed.`
+              : ""
+          }`
+        );
+      } else {
+        setMessage(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      setMessage(
+        `Error creating associations: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const associateContactsToTickets = async () => {
+    if (!isConfigured) {
+      setMessage(
+        "HubSpot API is not configured. Please set HUBSPOT_API_KEY environment variable."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage("");
+    setApiLogs([]);
+
+    try {
+      const response = await fetch("/api/hubspot/contact-ticket-associations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.logs) {
+        console.log("=== HubSpot Contact-Ticket Associations API Logs ===");
+        result.logs.forEach((log: string) => {
+          console.log(log);
+        });
+        console.log("=== End Logs ===");
+        setApiLogs(result.logs);
+      }
+
+      if (result.success) {
+        setMessage(
+          `Successfully created ${
+            result.summary.associationsCreated
+          } contact-ticket associations! ${
+            result.summary.associationsFailed > 0
+              ? `${result.summary.associationsFailed} failed.`
+              : ""
+          }`
+        );
+      } else {
+        setMessage(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      setMessage(
+        `Error creating associations: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendToHubSpot = async (type: "contacts" | "companies" | "tickets") => {
+    if (!isConfigured) {
+      setMessage(
+        "HubSpot API is not configured. Please set HUBSPOT_API_KEY environment variable."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage("");
+    setApiLogs([]);
+
+    try {
+      let data: Contact[] | Company[] | Ticket[];
       let endpoint: string;
 
       switch (type) {
@@ -114,10 +211,6 @@ export default function Home() {
         case "tickets":
           data = tickets;
           endpoint = "/api/hubspot/tickets";
-          break;
-        case "associations":
-          data = associations;
-          endpoint = "/api/hubspot/associations";
           break;
       }
 
@@ -183,8 +276,6 @@ export default function Home() {
         return companies;
       case "tickets":
         return tickets;
-      case "associations":
-        return associations;
       default:
         return [];
     }
@@ -203,90 +294,45 @@ export default function Home() {
             flexWrap: "wrap",
           }}
         >
-          {type !== "associations" ? (
-            <>
-              <Button
-                onClick={() =>
-                  generateData(type as "contacts" | "companies" | "tickets", 5)
-                }
-                disabled={isLoading}
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "#ffffff",
-                  padding: "12px 24px",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Generate 5 {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Button>
-              <Button
-                onClick={() =>
-                  generateData(type as "contacts" | "companies" | "tickets", 10)
-                }
-                disabled={isLoading}
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "#ffffff",
-                  padding: "12px 24px",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Generate 10 {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                onClick={() => generateAssociationsData(5)}
-                disabled={
-                  isLoading || contacts.length === 0 || companies.length === 0
-                }
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "#ffffff",
-                  padding: "12px 24px",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Generate 5 Associations
-              </Button>
-              <Button
-                onClick={() => generateAssociationsData(10)}
-                disabled={
-                  isLoading || contacts.length === 0 || companies.length === 0
-                }
-                style={{
-                  backgroundColor: "#3b82f6",
-                  color: "#ffffff",
-                  padding: "12px 24px",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                }}
-              >
-                Generate 10 Associations
-              </Button>
-            </>
-          )}
           <Button
             onClick={() =>
-              sendToHubSpot(
-                type as "contacts" | "companies" | "tickets" | "associations"
-              )
+              generateData(type as "contacts" | "companies" | "tickets", 5)
+            }
+            disabled={isLoading}
+            style={{
+              backgroundColor: "#3b82f6",
+              color: "#ffffff",
+              padding: "12px 24px",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Generate 5 {type.charAt(0).toUpperCase() + type.slice(1)}
+          </Button>
+          <Button
+            onClick={() =>
+              generateData(type as "contacts" | "companies" | "tickets", 10)
+            }
+            disabled={isLoading}
+            style={{
+              backgroundColor: "#3b82f6",
+              color: "#ffffff",
+              padding: "12px 24px",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Generate 10 {type.charAt(0).toUpperCase() + type.slice(1)}
+          </Button>
+          <Button
+            onClick={() =>
+              sendToHubSpot(type as "contacts" | "companies" | "tickets")
             }
             disabled={isLoading || data.length === 0 || !isConfigured}
             variant="outline"
@@ -301,115 +347,53 @@ export default function Home() {
           </Button>
         </div>
 
-        {type === "associations" && (
-          <div style={{ marginBottom: "24px" }}>
-            <p style={{ color: "#d1d5db", marginBottom: "16px" }}>
-              Note: You need to have contacts and companies generated first, and
-              they need to be sent to HubSpot to get real HubSpot IDs.
-            </p>
-          </div>
-        )}
+        {/* Association buttons for all tabs */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            marginBottom: "32px",
+            flexWrap: "wrap",
+          }}
+        >
+          <Button
+            onClick={associateContactsToCompanies}
+            disabled={isLoading}
+            style={{
+              backgroundColor: "#10b981",
+              color: "#ffffff",
+              padding: "12px 24px",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Associate Contacts to Companies
+          </Button>
+          <Button
+            onClick={associateContactsToTickets}
+            disabled={isLoading}
+            style={{
+              backgroundColor: "#f59e0b",
+              color: "#ffffff",
+              padding: "12px 24px",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Associate Contacts to Tickets
+          </Button>
+        </div>
 
-        {type === "associations" ? (
-          data.length > 0 ? (
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  minWidth: "100%",
-                  backgroundColor: "rgba(55, 65, 81, 0.8)",
-                  border: "1px solid #4b5563",
-                  borderRadius: "8px",
-                }}
-              >
-                <thead style={{ backgroundColor: "rgba(75, 85, 99, 0.8)" }}>
-                  <tr>
-                    <th
-                      style={{
-                        padding: "24px",
-                        textAlign: "left",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#d1d5db",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      Contact ID
-                    </th>
-                    <th
-                      style={{
-                        padding: "24px",
-                        textAlign: "left",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#d1d5db",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      Company ID
-                    </th>
-                  </tr>
-                </thead>
-                <tbody style={{ borderTop: "1px solid #4b5563" }}>
-                  {(data as Association[]).map(
-                    (association: Association, index) => (
-                      <tr
-                        key={index}
-                        style={{ borderBottom: "1px solid #4b5563" }}
-                      >
-                        <td
-                          style={{
-                            padding: "24px",
-                            fontFamily: "monospace",
-                            fontSize: "14px",
-                            color: "#d1d5db",
-                          }}
-                        >
-                          {association.contactId}
-                        </td>
-                        <td
-                          style={{
-                            padding: "24px",
-                            fontFamily: "monospace",
-                            fontSize: "14px",
-                            color: "#d1d5db",
-                          }}
-                        >
-                          {association.companyId}
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-              <div
-                style={{
-                  marginTop: "16px",
-                  fontSize: "14px",
-                  color: "#9ca3af",
-                }}
-              >
-                Total associations: {data.length}
-              </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "48px 0",
-                color: "#9ca3af",
-              }}
-            >
-              {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
-            </div>
-          )
-        ) : (
-          <DataDisplay
-            data={data as Contact[] | Company[] | Ticket[]}
-            type={type as "contacts" | "companies" | "tickets"}
-          />
-        )}
+        <DataDisplay
+          data={data as Contact[] | Company[] | Ticket[]}
+          type={type as "contacts" | "companies" | "tickets"}
+        />
       </div>
     );
   };
@@ -638,7 +622,7 @@ export default function Home() {
               <TabsList
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gridTemplateColumns: "repeat(3, 1fr)",
                   width: "100%",
                   backgroundColor: "transparent",
                   border: "none",
@@ -659,8 +643,7 @@ export default function Home() {
                       fontSize: "16px",
                       fontWeight: "500",
                       textTransform: "capitalize",
-                      borderRight:
-                        type !== "associations" ? "1px solid #4b5563" : "none",
+                      borderRight: "1px solid #4b5563",
                       transition: "all 0.2s ease",
                       cursor: "pointer",
                       position: "relative",
