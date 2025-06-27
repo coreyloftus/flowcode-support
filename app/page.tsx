@@ -26,6 +26,9 @@ export default function Home() {
   const [isCheckingConfig, setIsCheckingConfig] = useState(true);
   const [apiLogs, setApiLogs] = useState<string[]>([]);
 
+  // Define the tab types
+  const tabTypes = ["contacts", "companies", "tickets", "associations"];
+
   useEffect(() => {
     checkHubSpotConfig();
   }, []);
@@ -170,6 +173,245 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getDataForType = (type: string) => {
+    switch (type) {
+      case "contacts":
+        return contacts;
+      case "companies":
+        return companies;
+      case "tickets":
+        return tickets;
+      case "associations":
+        return associations;
+      default:
+        return [];
+    }
+  };
+
+  const renderTabContent = (type: string) => {
+    const data = getDataForType(type);
+
+    return (
+      <div style={{ padding: "32px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            marginBottom: "32px",
+            flexWrap: "wrap",
+          }}
+        >
+          {type !== "associations" ? (
+            <>
+              <Button
+                onClick={() =>
+                  generateData(type as "contacts" | "companies" | "tickets", 5)
+                }
+                disabled={isLoading}
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "#ffffff",
+                  padding: "12px 24px",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                }}
+              >
+                Generate 5 {type.charAt(0).toUpperCase() + type.slice(1)}
+              </Button>
+              <Button
+                onClick={() =>
+                  generateData(type as "contacts" | "companies" | "tickets", 10)
+                }
+                disabled={isLoading}
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "#ffffff",
+                  padding: "12px 24px",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                }}
+              >
+                Generate 10 {type.charAt(0).toUpperCase() + type.slice(1)}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() => generateAssociationsData(5)}
+                disabled={
+                  isLoading || contacts.length === 0 || companies.length === 0
+                }
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "#ffffff",
+                  padding: "12px 24px",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                }}
+              >
+                Generate 5 Associations
+              </Button>
+              <Button
+                onClick={() => generateAssociationsData(10)}
+                disabled={
+                  isLoading || contacts.length === 0 || companies.length === 0
+                }
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "#ffffff",
+                  padding: "12px 24px",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                }}
+              >
+                Generate 10 Associations
+              </Button>
+            </>
+          )}
+          <Button
+            onClick={() =>
+              sendToHubSpot(
+                type as "contacts" | "companies" | "tickets" | "associations"
+              )
+            }
+            disabled={isLoading || data.length === 0 || !isConfigured}
+            variant="outline"
+            style={{
+              borderColor: "#6b7280",
+              color: "#d1d5db",
+              padding: "12px 24px",
+              backgroundColor: "transparent",
+            }}
+          >
+            {isLoading ? "Sending..." : "Send to HubSpot"}
+          </Button>
+        </div>
+
+        {type === "associations" && (
+          <div style={{ marginBottom: "24px" }}>
+            <p style={{ color: "#d1d5db", marginBottom: "16px" }}>
+              Note: You need to have contacts and companies generated first, and
+              they need to be sent to HubSpot to get real HubSpot IDs.
+            </p>
+          </div>
+        )}
+
+        {type === "associations" ? (
+          data.length > 0 ? (
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  minWidth: "100%",
+                  backgroundColor: "rgba(55, 65, 81, 0.8)",
+                  border: "1px solid #4b5563",
+                  borderRadius: "8px",
+                }}
+              >
+                <thead style={{ backgroundColor: "rgba(75, 85, 99, 0.8)" }}>
+                  <tr>
+                    <th
+                      style={{
+                        padding: "24px",
+                        textAlign: "left",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#d1d5db",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Contact ID
+                    </th>
+                    <th
+                      style={{
+                        padding: "24px",
+                        textAlign: "left",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#d1d5db",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Company ID
+                    </th>
+                  </tr>
+                </thead>
+                <tbody style={{ borderTop: "1px solid #4b5563" }}>
+                  {(data as Association[]).map(
+                    (association: Association, index) => (
+                      <tr
+                        key={index}
+                        style={{ borderBottom: "1px solid #4b5563" }}
+                      >
+                        <td
+                          style={{
+                            padding: "24px",
+                            fontFamily: "monospace",
+                            fontSize: "14px",
+                            color: "#d1d5db",
+                          }}
+                        >
+                          {association.contactId}
+                        </td>
+                        <td
+                          style={{
+                            padding: "24px",
+                            fontFamily: "monospace",
+                            fontSize: "14px",
+                            color: "#d1d5db",
+                          }}
+                        >
+                          {association.companyId}
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+              <div
+                style={{
+                  marginTop: "16px",
+                  fontSize: "14px",
+                  color: "#9ca3af",
+                }}
+              >
+                Total associations: {data.length}
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "48px 0",
+                color: "#9ca3af",
+              }}
+            >
+              {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
+            </div>
+          )
+        ) : (
+          <DataDisplay
+            data={data as Contact[] | Company[] | Ticket[]}
+            type={type as "contacts" | "companies" | "tickets"}
+          />
+        )}
+      </div>
+    );
   };
 
   if (isCheckingConfig) {
@@ -383,10 +625,16 @@ export default function Home() {
             backgroundColor: "rgba(55, 65, 81, 0.8)",
             border: "1px solid #4b5563",
             borderRadius: "8px",
+            overflow: "hidden",
           }}
         >
           <Tabs defaultValue="contacts" style={{ width: "100%" }}>
-            <div style={{ borderBottom: "1px solid #4b5563" }}>
+            <div
+              style={{
+                borderBottom: "1px solid #4b5563",
+                backgroundColor: "rgba(75, 85, 99, 0.8)",
+              }}
+            >
               <TabsList
                 style={{
                   display: "grid",
@@ -395,398 +643,49 @@ export default function Home() {
                   backgroundColor: "transparent",
                   border: "none",
                   height: "64px",
+                  gap: "0",
                 }}
               >
-                <TabsTrigger
-                  value="contacts"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#9ca3af",
-                    border: "none",
-                    borderRadius: "0",
-                    height: "100%",
-                    fontSize: "16px",
-                  }}
-                >
-                  Contacts
-                </TabsTrigger>
-                <TabsTrigger
-                  value="companies"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#9ca3af",
-                    border: "none",
-                    borderRadius: "0",
-                    height: "100%",
-                    fontSize: "16px",
-                  }}
-                >
-                  Companies
-                </TabsTrigger>
-                <TabsTrigger
-                  value="tickets"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#9ca3af",
-                    border: "none",
-                    borderRadius: "0",
-                    height: "100%",
-                    fontSize: "16px",
-                  }}
-                >
-                  Tickets
-                </TabsTrigger>
-                <TabsTrigger
-                  value="associations"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: "#9ca3af",
-                    border: "none",
-                    borderRadius: "0",
-                    height: "100%",
-                    fontSize: "16px",
-                  }}
-                >
-                  Associations
-                </TabsTrigger>
+                {tabTypes.map((type) => (
+                  <TabsTrigger
+                    key={type}
+                    value={type}
+                    style={{
+                      backgroundColor: "transparent",
+                      color: "#9ca3af",
+                      border: "none",
+                      borderRadius: "0",
+                      height: "100%",
+                      fontSize: "16px",
+                      fontWeight: "500",
+                      textTransform: "capitalize",
+                      borderRight:
+                        type !== "associations" ? "1px solid #4b5563" : "none",
+                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                      position: "relative",
+                    }}
+                    className="data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500"
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
 
-            <TabsContent value="contacts" style={{ padding: "32px" }}>
-              <div
+            {tabTypes.map((type) => (
+              <TabsContent
+                key={type}
+                value={type}
                 style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "32px",
-                  flexWrap: "wrap",
+                  margin: "0",
+                  backgroundColor: "rgba(55, 65, 81, 0.8)",
+                  borderTop: "1px solid #4b5563",
                 }}
               >
-                <Button
-                  onClick={() => generateData("contacts", 5)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 5 Contacts
-                </Button>
-                <Button
-                  onClick={() => generateData("contacts", 10)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 10 Contacts
-                </Button>
-                <Button
-                  onClick={() => sendToHubSpot("contacts")}
-                  disabled={isLoading || contacts.length === 0 || !isConfigured}
-                  variant="outline"
-                  style={{
-                    borderColor: "#6b7280",
-                    color: "#d1d5db",
-                    padding: "12px 24px",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  {isLoading ? "Sending..." : "Send to HubSpot"}
-                </Button>
-              </div>
-              <DataDisplay data={contacts} type="contacts" />
-            </TabsContent>
-
-            <TabsContent value="companies" style={{ padding: "32px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "32px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Button
-                  onClick={() => generateData("companies", 5)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 5 Companies
-                </Button>
-                <Button
-                  onClick={() => generateData("companies", 10)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 10 Companies
-                </Button>
-                <Button
-                  onClick={() => sendToHubSpot("companies")}
-                  disabled={
-                    isLoading || companies.length === 0 || !isConfigured
-                  }
-                  variant="outline"
-                  style={{
-                    borderColor: "#6b7280",
-                    color: "#d1d5db",
-                    padding: "12px 24px",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  {isLoading ? "Sending..." : "Send to HubSpot"}
-                </Button>
-              </div>
-              <DataDisplay data={companies} type="companies" />
-            </TabsContent>
-
-            <TabsContent value="tickets" style={{ padding: "32px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "32px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Button
-                  onClick={() => generateData("tickets", 5)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 5 Tickets
-                </Button>
-                <Button
-                  onClick={() => generateData("tickets", 10)}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 10 Tickets
-                </Button>
-                <Button
-                  onClick={() => sendToHubSpot("tickets")}
-                  disabled={isLoading || tickets.length === 0 || !isConfigured}
-                  variant="outline"
-                  style={{
-                    borderColor: "#6b7280",
-                    color: "#d1d5db",
-                    padding: "12px 24px",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  {isLoading ? "Sending..." : "Send to HubSpot"}
-                </Button>
-              </div>
-              <DataDisplay data={tickets} type="tickets" />
-            </TabsContent>
-
-            <TabsContent value="associations" style={{ padding: "32px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "16px",
-                  marginBottom: "32px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Button
-                  onClick={() => generateAssociationsData(5)}
-                  disabled={
-                    isLoading || contacts.length === 0 || companies.length === 0
-                  }
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 5 Associations
-                </Button>
-                <Button
-                  onClick={() => generateAssociationsData(10)}
-                  disabled={
-                    isLoading || contacts.length === 0 || companies.length === 0
-                  }
-                  style={{
-                    backgroundColor: "#3b82f6",
-                    color: "#ffffff",
-                    padding: "12px 24px",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                  }}
-                >
-                  Generate 10 Associations
-                </Button>
-                <Button
-                  onClick={() => sendToHubSpot("associations")}
-                  disabled={
-                    isLoading || associations.length === 0 || !isConfigured
-                  }
-                  variant="outline"
-                  style={{
-                    borderColor: "#6b7280",
-                    color: "#d1d5db",
-                    padding: "12px 24px",
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  {isLoading ? "Sending..." : "Send to HubSpot"}
-                </Button>
-              </div>
-              <div style={{ marginBottom: "24px" }}>
-                <p style={{ color: "#d1d5db", marginBottom: "16px" }}>
-                  Note: You need to have contacts and companies generated first,
-                  and they need to be sent to HubSpot to get real HubSpot IDs.
-                </p>
-              </div>
-              {associations.length > 0 ? (
-                <div style={{ overflowX: "auto" }}>
-                  <table
-                    style={{
-                      minWidth: "100%",
-                      backgroundColor: "rgba(55, 65, 81, 0.8)",
-                      border: "1px solid #4b5563",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <thead style={{ backgroundColor: "rgba(75, 85, 99, 0.8)" }}>
-                      <tr>
-                        <th
-                          style={{
-                            padding: "24px",
-                            textAlign: "left",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: "#d1d5db",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}
-                        >
-                          Contact ID
-                        </th>
-                        <th
-                          style={{
-                            padding: "24px",
-                            textAlign: "left",
-                            fontSize: "14px",
-                            fontWeight: "500",
-                            color: "#d1d5db",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}
-                        >
-                          Company ID
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody style={{ borderTop: "1px solid #4b5563" }}>
-                      {associations.map((association, index) => (
-                        <tr
-                          key={index}
-                          style={{ borderBottom: "1px solid #4b5563" }}
-                        >
-                          <td
-                            style={{
-                              padding: "24px",
-                              fontFamily: "monospace",
-                              fontSize: "14px",
-                              color: "#d1d5db",
-                            }}
-                          >
-                            {association.contactId}
-                          </td>
-                          <td
-                            style={{
-                              padding: "24px",
-                              fontFamily: "monospace",
-                              fontSize: "14px",
-                              color: "#d1d5db",
-                            }}
-                          >
-                            {association.companyId}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div
-                    style={{
-                      marginTop: "16px",
-                      fontSize: "14px",
-                      color: "#9ca3af",
-                    }}
-                  >
-                    Total associations: {associations.length}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "48px 0",
-                    color: "#9ca3af",
-                  }}
-                >
-                  {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
-                </div>
-              )}
-            </TabsContent>
+                {renderTabContent(type)}
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
       </div>

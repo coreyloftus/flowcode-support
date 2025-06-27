@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         );
 
         const response = await fetch(
-          `https://api.hubapi.com/crm/v4/objects/contacts/${contactId}/associations/companies/${companyId}/contact_to_company`,
+          `https://api.hubapi.com/crm/v4/objects/contact/${contactId}/associations/company/${companyId}/`,
           {
             method: "PUT",
             headers: {
