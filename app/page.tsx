@@ -8,15 +8,18 @@ import {
   generateContacts,
   generateCompanies,
   generateTickets,
+  generateAssociations,
   Contact,
   Company,
   Ticket,
+  Association,
 } from "@/lib/faker-data";
 
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [associations, setAssociations] = useState<Association[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isConfigured, setIsConfigured] = useState(false);
@@ -70,7 +73,17 @@ export default function Home() {
     setMessage(`${count} ${type} generated successfully!`);
   };
 
-  const sendToHubSpot = async (type: "contacts" | "companies" | "tickets") => {
+  const generateAssociationsData = (count: number = 5) => {
+    const newAssociations = generateAssociations(contacts, companies, count);
+    setAssociations(newAssociations);
+    setMessage(
+      `${newAssociations.length} associations generated successfully!`
+    );
+  };
+
+  const sendToHubSpot = async (
+    type: "contacts" | "companies" | "tickets" | "associations"
+  ) => {
     if (!isConfigured) {
       setMessage(
         "HubSpot API is not configured. Please set HUBSPOT_API_KEY environment variable."
@@ -83,7 +96,7 @@ export default function Home() {
     setApiLogs([]);
 
     try {
-      let data: Contact[] | Company[] | Ticket[];
+      let data: Contact[] | Company[] | Ticket[] | Association[];
       let endpoint: string;
 
       switch (type) {
@@ -98,6 +111,10 @@ export default function Home() {
         case "tickets":
           data = tickets;
           endpoint = "/api/hubspot/tickets";
+          break;
+        case "associations":
+          data = associations;
+          endpoint = "/api/hubspot/associations";
           break;
       }
 
@@ -238,10 +255,11 @@ export default function Home() {
 
         {/* Tabs */}
         <Tabs defaultValue="contacts" className="bg-white rounded-lg shadow">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="companies">Companies</TabsTrigger>
             <TabsTrigger value="tickets">Tickets</TabsTrigger>
+            <TabsTrigger value="associations">Associations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="contacts" className="p-6">
@@ -317,6 +335,77 @@ export default function Home() {
               </Button>
             </div>
             <DataDisplay data={tickets} type="tickets" />
+          </TabsContent>
+
+          <TabsContent value="associations" className="p-6">
+            <div className="flex gap-4 mb-6">
+              <Button
+                onClick={() => generateAssociationsData(5)}
+                disabled={
+                  isLoading || contacts.length === 0 || companies.length === 0
+                }
+              >
+                Generate 5 Associations
+              </Button>
+              <Button
+                onClick={() => generateAssociationsData(10)}
+                disabled={
+                  isLoading || contacts.length === 0 || companies.length === 0
+                }
+              >
+                Generate 10 Associations
+              </Button>
+              <Button
+                onClick={() => sendToHubSpot("associations")}
+                disabled={
+                  isLoading || associations.length === 0 || !isConfigured
+                }
+                variant="outline"
+              >
+                {isLoading ? "Sending..." : "Send to HubSpot"}
+              </Button>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                Note: You need to have contacts and companies generated first,
+                and they need to be sent to HubSpot to get real HubSpot IDs.
+              </p>
+            </div>
+            {associations.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Contact ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Company ID
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {associations.map((association, index) => (
+                      <tr key={index} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-2 font-mono text-sm">
+                          {association.contactId}
+                        </td>
+                        <td className="px-4 py-2 font-mono text-sm">
+                          {association.companyId}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-4 text-sm text-gray-600">
+                  Total associations: {associations.length}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

@@ -1,32 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const logs: string[] = [];
+
   try {
     const { tickets } = await request.json();
     const apiKey = process.env.HUBSPOT_API_KEY;
 
     if (!apiKey) {
+      logs.push("❌ HubSpot API key not configured");
       return NextResponse.json(
         {
           error:
             "HubSpot API key not configured. Please set HUBSPOT_API_KEY environment variable.",
+          logs,
         },
         { status: 500 }
       );
     }
 
     if (!tickets || !Array.isArray(tickets)) {
+      logs.push("❌ Tickets array is required");
       return NextResponse.json(
-        { error: "Tickets array is required" },
+        {
+          error: "Tickets array is required",
+          logs,
+        },
         { status: 400 }
       );
     }
+
+    logs.push(`🚀 Starting to process ${tickets.length} tickets...`);
 
     const results = [];
     const errors = [];
 
     for (const ticket of tickets) {
       try {
+        logs.push(
+          `📤 Sending ticket: ${ticket.subject} (${ticket.hs_ticket_priority} priority)`
+        );
+
         const response = await fetch(
           "https://api.hubapi.com/crm/v3/objects/tickets",
           {
@@ -53,12 +67,23 @@ export async function POST(request: NextRequest) {
 
         if (response.ok) {
           const result = await response.json();
+          logs.push(
+            `✅ Ticket created successfully: ${ticket.subject} -> HubSpot ID: ${result.id}`
+          );
           results.push({ id: ticket.id, hubspotId: result.id, success: true });
         } else {
-          const error = await response.text();
-          errors.push({ id: ticket.id, error: error, success: false });
+          const errorText = await response.text();
+          logs.push(
+            `❌ Failed to create ticket ${ticket.subject}: Status ${response.status} - ${errorText}`
+          );
+          errors.push({ id: ticket.id, error: errorText, success: false });
         }
       } catch (error) {
+        logs.push(
+          `💥 Exception creating ticket ${ticket.subject}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
         errors.push({
           id: ticket.id,
           error: error instanceof Error ? error.message : "Unknown error",
@@ -67,10 +92,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    logs.push(
+      `📊 Ticket processing complete: ${results.length} successful, ${errors.length} failed`
+    );
+
     return NextResponse.json({
       success: true,
       results,
       errors,
+      logs,
       summary: {
         total: tickets.length,
         successful: results.length,
@@ -78,10 +108,16 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    logs.push(
+      `💥 General error in tickets API route: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
     return NextResponse.json(
       {
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
+        logs,
       },
       { status: 500 }
     );
