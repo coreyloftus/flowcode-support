@@ -8,60 +8,69 @@ interface DataDisplayProps {
 export function DataDisplay({ data, type }: DataDisplayProps) {
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        No {type} generated yet. Click "Generate Data" to create some!
+      <div style={{ textAlign: "center", padding: "32px 0", color: "#9ca3af" }}>
+        No {type} generated yet. Click &quot;Generate Data&quot; to create some!
       </div>
     );
   }
 
   const renderContactRow = (contact: Contact) => (
-    <tr key={contact.id} className="border-b hover:bg-gray-50">
-      <td className="px-4 py-2">
+    <tr key={contact.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
         {contact.firstname} {contact.lastname}
       </td>
-      <td className="px-4 py-2">{contact.email}</td>
-      <td className="px-4 py-2">{contact.company}</td>
-      <td className="px-4 py-2">{contact.jobtitle}</td>
-      <td className="px-4 py-2">{contact.phone}</td>
-      <td className="px-4 py-2">{contact.lifecycle_stage}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.email}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.company}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.jobtitle}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.phone}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {contact.city}, {contact.state}
+      </td>
     </tr>
   );
 
   const renderCompanyRow = (company: Company) => (
-    <tr key={company.id} className="border-b hover:bg-gray-50">
-      <td className="px-4 py-2">{company.name}</td>
-      <td className="px-4 py-2">{company.domain}</td>
-      <td className="px-4 py-2">{company.industry}</td>
-      <td className="px-4 py-2">{company.numberofemployees}</td>
-      <td className="px-4 py-2">${company.annualrevenue.toLocaleString()}</td>
-      <td className="px-4 py-2">
+    <tr key={company.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{company.name}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{company.domain}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{company.industry}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {company.numberofemployees}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        ${company.annualrevenue.toLocaleString()}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
         {company.city}, {company.state}
       </td>
     </tr>
   );
 
   const renderTicketRow = (ticket: Ticket) => (
-    <tr key={ticket.id} className="border-b hover:bg-gray-50">
-      <td className="px-4 py-2">{ticket.subject}</td>
-      <td className="px-4 py-2">{ticket.hs_ticket_priority}</td>
-      <td className="px-4 py-2">{ticket.hs_ticket_category}</td>
-      <td className="px-4 py-2">{ticket.hs_ticket_type}</td>
-      <td className="px-4 py-2">{ticket.hs_pipeline_stage}</td>
-      <td className="px-4 py-2">{ticket.hs_ticket_source}</td>
+    <tr key={ticket.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{ticket.subject}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {ticket.hs_ticket_priority}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {ticket.hs_ticket_category}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {ticket.hs_ticket_type}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {ticket.hs_pipeline_stage}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {ticket.hs_ticket_source}
+      </td>
     </tr>
   );
 
   const getHeaders = () => {
     switch (type) {
       case "contacts":
-        return [
-          "Name",
-          "Email",
-          "Company",
-          "Job Title",
-          "Phone",
-          "Lifecycle Stage",
-        ];
+        return ["Name", "Email", "Company", "Job Title", "Phone", "Location"];
       case "companies":
         return [
           "Name",
@@ -92,25 +101,40 @@ export function DataDisplay({ data, type }: DataDisplayProps) {
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-        <thead className="bg-gray-50">
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          minWidth: "100%",
+          backgroundColor: "rgba(55, 65, 81, 0.8)",
+          border: "1px solid #4b5563",
+          borderRadius: "8px",
+        }}
+      >
+        <thead style={{ backgroundColor: "rgba(75, 85, 99, 0.8)" }}>
           <tr>
             {getHeaders().map((header) => (
               <th
                 key={header}
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                style={{
+                  padding: "24px",
+                  textAlign: "left",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  color: "#d1d5db",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                }}
               >
                 {header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody style={{ borderTop: "1px solid #4b5563" }}>
           {data.map(renderRow)}
         </tbody>
       </table>
-      <div className="mt-4 text-sm text-gray-600">
+      <div style={{ marginTop: "16px", fontSize: "14px", color: "#9ca3af" }}>
         Total {type}: {data.length}
       </div>
     </div>

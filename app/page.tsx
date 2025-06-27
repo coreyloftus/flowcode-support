@@ -174,240 +174,621 @@ export default function Home() {
 
   if (isCheckingConfig) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking HubSpot configuration...</p>
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#000000",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              animation: "spin 1s linear infinite",
+              borderRadius: "50%",
+              height: "48px",
+              width: "48px",
+              borderBottom: "2px solid #ffffff",
+              margin: "0 auto 16px",
+            }}
+          ></div>
+          <p style={{ color: "#d1d5db" }}>Checking HubSpot configuration...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            HubSpot Data Generator
-          </h1>
-          <p className="text-gray-600">
-            Generate fake data and send it to HubSpot using the API
-          </p>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 0",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1152px",
+          margin: "0 auto",
+          padding: "0 16px",
+          width: "100%",
+        }}
+      >
+        {/* Header Section */}
+        <div
+          style={{
+            marginBottom: "32px",
+            backgroundColor: "rgba(55, 65, 81, 0.8)",
+            border: "1px solid #4b5563",
+            borderRadius: "8px",
+            padding: "32px",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <h1
+              style={{
+                fontSize: "36px",
+                fontWeight: "bold",
+                color: "#ffffff",
+                marginBottom: "16px",
+                letterSpacing: "-0.025em",
+              }}
+            >
+              HubSpot Data Generator
+            </h1>
+            <p style={{ color: "#d1d5db", fontSize: "18px" }}>
+              Generate fake data and send it to HubSpot using the API
+            </p>
+          </div>
         </div>
 
         {/* Configuration Status */}
         <div
-          className={`mb-6 p-4 rounded-md ${
-            isConfigured
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}
+          style={{
+            marginBottom: "32px",
+            borderRadius: "8px",
+            padding: "24px",
+            backgroundColor: isConfigured
+              ? "rgba(34, 197, 94, 0.2)"
+              : "rgba(239, 68, 68, 0.2)",
+            border: `1px solid ${
+              isConfigured ? "rgba(34, 197, 94, 0.5)" : "rgba(239, 68, 68, 0.5)"
+            }`,
+          }}
         >
-          <div className="flex items-center justify-between">
-            <span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span
+              style={{ fontSize: "18px", fontWeight: "500", color: "#ffffff" }}
+            >
               {isConfigured
                 ? "✅ HubSpot API Configured"
                 : "❌ HubSpot API Not Configured"}
             </span>
-            <Button onClick={checkHubSpotConfig} variant="outline" size="sm">
+            <Button
+              onClick={checkHubSpotConfig}
+              variant="outline"
+              size="sm"
+              style={{
+                borderColor: "#6b7280",
+                color: "#d1d5db",
+                padding: "8px 16px",
+              }}
+            >
               Refresh Status
             </Button>
           </div>
-          <p className="text-sm mt-1">{message}</p>
+          <p style={{ color: "#d1d5db", marginTop: "8px" }}>{message}</p>
         </div>
 
         {/* Message Display */}
         {message && !message.includes("HubSpot API") && (
           <div
-            className={`mb-6 p-4 rounded-md ${
-              message.includes("Error") || message.includes("failed")
-                ? "bg-red-50 text-red-700 border border-red-200"
-                : "bg-green-50 text-green-700 border border-green-200"
-            }`}
+            style={{
+              marginBottom: "32px",
+              borderRadius: "8px",
+              padding: "24px",
+              backgroundColor:
+                message.includes("Error") || message.includes("failed")
+                  ? "rgba(239, 68, 68, 0.2)"
+                  : "rgba(34, 197, 94, 0.2)",
+              border: `1px solid ${
+                message.includes("Error") || message.includes("failed")
+                  ? "rgba(239, 68, 68, 0.5)"
+                  : "rgba(34, 197, 94, 0.5)"
+              }`,
+            }}
           >
-            {message}
+            <p style={{ color: "#d1d5db" }}>{message}</p>
           </div>
         )}
 
         {/* API Logs Display */}
         {apiLogs.length > 0 && (
-          <div className="mb-6 bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm overflow-auto max-h-64">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-semibold">
+          <div
+            style={{
+              marginBottom: "32px",
+              backgroundColor: "rgba(55, 65, 81, 0.8)",
+              border: "1px solid #4b5563",
+              borderRadius: "8px",
+              padding: "24px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "16px",
+              }}
+            >
+              <span
+                style={{
+                  color: "#ffffff",
+                  fontWeight: "600",
+                  fontSize: "18px",
+                }}
+              >
                 API Logs (also in browser console)
               </span>
               <Button
                 onClick={() => setApiLogs([])}
                 variant="outline"
                 size="sm"
-                className="text-xs"
+                style={{
+                  borderColor: "#6b7280",
+                  color: "#d1d5db",
+                  padding: "8px 16px",
+                }}
               >
                 Clear
               </Button>
             </div>
-            {apiLogs.map((log, index) => (
-              <div key={index} className="mb-1">
-                {log}
-              </div>
-            ))}
+            <div
+              style={{
+                backgroundColor: "#000000",
+                color: "#4ade80",
+                padding: "16px",
+                borderRadius: "6px",
+                fontFamily: "monospace",
+                fontSize: "14px",
+                overflow: "auto",
+                maxHeight: "256px",
+                border: "1px solid #1f2937",
+              }}
+            >
+              {apiLogs.map((log, index) => (
+                <div key={index} style={{ marginBottom: "4px" }}>
+                  {log}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Tabs */}
-        <Tabs defaultValue="contacts" className="bg-white rounded-lg shadow">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="contacts">Contacts</TabsTrigger>
-            <TabsTrigger value="companies">Companies</TabsTrigger>
-            <TabsTrigger value="tickets">Tickets</TabsTrigger>
-            <TabsTrigger value="associations">Associations</TabsTrigger>
-          </TabsList>
+        {/* Main Content Tabs */}
+        <div
+          style={{
+            backgroundColor: "rgba(55, 65, 81, 0.8)",
+            border: "1px solid #4b5563",
+            borderRadius: "8px",
+          }}
+        >
+          <Tabs defaultValue="contacts" style={{ width: "100%" }}>
+            <div style={{ borderBottom: "1px solid #4b5563" }}>
+              <TabsList
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  width: "100%",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  height: "64px",
+                }}
+              >
+                <TabsTrigger
+                  value="contacts"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#9ca3af",
+                    border: "none",
+                    borderRadius: "0",
+                    height: "100%",
+                    fontSize: "16px",
+                  }}
+                >
+                  Contacts
+                </TabsTrigger>
+                <TabsTrigger
+                  value="companies"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#9ca3af",
+                    border: "none",
+                    borderRadius: "0",
+                    height: "100%",
+                    fontSize: "16px",
+                  }}
+                >
+                  Companies
+                </TabsTrigger>
+                <TabsTrigger
+                  value="tickets"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#9ca3af",
+                    border: "none",
+                    borderRadius: "0",
+                    height: "100%",
+                    fontSize: "16px",
+                  }}
+                >
+                  Tickets
+                </TabsTrigger>
+                <TabsTrigger
+                  value="associations"
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#9ca3af",
+                    border: "none",
+                    borderRadius: "0",
+                    height: "100%",
+                    fontSize: "16px",
+                  }}
+                >
+                  Associations
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          <TabsContent value="contacts" className="p-6">
-            <div className="flex gap-4 mb-6">
-              <Button
-                onClick={() => generateData("contacts", 5)}
-                disabled={isLoading}
+            <TabsContent value="contacts" style={{ padding: "32px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginBottom: "32px",
+                  flexWrap: "wrap",
+                }}
               >
-                Generate 5 Contacts
-              </Button>
-              <Button
-                onClick={() => generateData("contacts", 10)}
-                disabled={isLoading}
-              >
-                Generate 10 Contacts
-              </Button>
-              <Button
-                onClick={() => sendToHubSpot("contacts")}
-                disabled={isLoading || contacts.length === 0 || !isConfigured}
-                variant="outline"
-              >
-                {isLoading ? "Sending..." : "Send to HubSpot"}
-              </Button>
-            </div>
-            <DataDisplay data={contacts} type="contacts" />
-          </TabsContent>
+                <Button
+                  onClick={() => generateData("contacts", 5)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 5 Contacts
+                </Button>
+                <Button
+                  onClick={() => generateData("contacts", 10)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 10 Contacts
+                </Button>
+                <Button
+                  onClick={() => sendToHubSpot("contacts")}
+                  disabled={isLoading || contacts.length === 0 || !isConfigured}
+                  variant="outline"
+                  style={{
+                    borderColor: "#6b7280",
+                    color: "#d1d5db",
+                    padding: "12px 24px",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  {isLoading ? "Sending..." : "Send to HubSpot"}
+                </Button>
+              </div>
+              <DataDisplay data={contacts} type="contacts" />
+            </TabsContent>
 
-          <TabsContent value="companies" className="p-6">
-            <div className="flex gap-4 mb-6">
-              <Button
-                onClick={() => generateData("companies", 5)}
-                disabled={isLoading}
+            <TabsContent value="companies" style={{ padding: "32px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginBottom: "32px",
+                  flexWrap: "wrap",
+                }}
               >
-                Generate 5 Companies
-              </Button>
-              <Button
-                onClick={() => generateData("companies", 10)}
-                disabled={isLoading}
-              >
-                Generate 10 Companies
-              </Button>
-              <Button
-                onClick={() => sendToHubSpot("companies")}
-                disabled={isLoading || companies.length === 0 || !isConfigured}
-                variant="outline"
-              >
-                {isLoading ? "Sending..." : "Send to HubSpot"}
-              </Button>
-            </div>
-            <DataDisplay data={companies} type="companies" />
-          </TabsContent>
+                <Button
+                  onClick={() => generateData("companies", 5)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 5 Companies
+                </Button>
+                <Button
+                  onClick={() => generateData("companies", 10)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 10 Companies
+                </Button>
+                <Button
+                  onClick={() => sendToHubSpot("companies")}
+                  disabled={
+                    isLoading || companies.length === 0 || !isConfigured
+                  }
+                  variant="outline"
+                  style={{
+                    borderColor: "#6b7280",
+                    color: "#d1d5db",
+                    padding: "12px 24px",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  {isLoading ? "Sending..." : "Send to HubSpot"}
+                </Button>
+              </div>
+              <DataDisplay data={companies} type="companies" />
+            </TabsContent>
 
-          <TabsContent value="tickets" className="p-6">
-            <div className="flex gap-4 mb-6">
-              <Button
-                onClick={() => generateData("tickets", 5)}
-                disabled={isLoading}
+            <TabsContent value="tickets" style={{ padding: "32px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginBottom: "32px",
+                  flexWrap: "wrap",
+                }}
               >
-                Generate 5 Tickets
-              </Button>
-              <Button
-                onClick={() => generateData("tickets", 10)}
-                disabled={isLoading}
-              >
-                Generate 10 Tickets
-              </Button>
-              <Button
-                onClick={() => sendToHubSpot("tickets")}
-                disabled={isLoading || tickets.length === 0 || !isConfigured}
-                variant="outline"
-              >
-                {isLoading ? "Sending..." : "Send to HubSpot"}
-              </Button>
-            </div>
-            <DataDisplay data={tickets} type="tickets" />
-          </TabsContent>
+                <Button
+                  onClick={() => generateData("tickets", 5)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 5 Tickets
+                </Button>
+                <Button
+                  onClick={() => generateData("tickets", 10)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 10 Tickets
+                </Button>
+                <Button
+                  onClick={() => sendToHubSpot("tickets")}
+                  disabled={isLoading || tickets.length === 0 || !isConfigured}
+                  variant="outline"
+                  style={{
+                    borderColor: "#6b7280",
+                    color: "#d1d5db",
+                    padding: "12px 24px",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  {isLoading ? "Sending..." : "Send to HubSpot"}
+                </Button>
+              </div>
+              <DataDisplay data={tickets} type="tickets" />
+            </TabsContent>
 
-          <TabsContent value="associations" className="p-6">
-            <div className="flex gap-4 mb-6">
-              <Button
-                onClick={() => generateAssociationsData(5)}
-                disabled={
-                  isLoading || contacts.length === 0 || companies.length === 0
-                }
+            <TabsContent value="associations" style={{ padding: "32px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginBottom: "32px",
+                  flexWrap: "wrap",
+                }}
               >
-                Generate 5 Associations
-              </Button>
-              <Button
-                onClick={() => generateAssociationsData(10)}
-                disabled={
-                  isLoading || contacts.length === 0 || companies.length === 0
-                }
-              >
-                Generate 10 Associations
-              </Button>
-              <Button
-                onClick={() => sendToHubSpot("associations")}
-                disabled={
-                  isLoading || associations.length === 0 || !isConfigured
-                }
-                variant="outline"
-              >
-                {isLoading ? "Sending..." : "Send to HubSpot"}
-              </Button>
-            </div>
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                Note: You need to have contacts and companies generated first,
-                and they need to be sent to HubSpot to get real HubSpot IDs.
-              </p>
-            </div>
-            {associations.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contact ID
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Company ID
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {associations.map((association, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-2 font-mono text-sm">
-                          {association.contactId}
-                        </td>
-                        <td className="px-4 py-2 font-mono text-sm">
-                          {association.companyId}
-                        </td>
+                <Button
+                  onClick={() => generateAssociationsData(5)}
+                  disabled={
+                    isLoading || contacts.length === 0 || companies.length === 0
+                  }
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 5 Associations
+                </Button>
+                <Button
+                  onClick={() => generateAssociationsData(10)}
+                  disabled={
+                    isLoading || contacts.length === 0 || companies.length === 0
+                  }
+                  style={{
+                    backgroundColor: "#3b82f6",
+                    color: "#ffffff",
+                    padding: "12px 24px",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    cursor: "pointer",
+                  }}
+                >
+                  Generate 10 Associations
+                </Button>
+                <Button
+                  onClick={() => sendToHubSpot("associations")}
+                  disabled={
+                    isLoading || associations.length === 0 || !isConfigured
+                  }
+                  variant="outline"
+                  style={{
+                    borderColor: "#6b7280",
+                    color: "#d1d5db",
+                    padding: "12px 24px",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  {isLoading ? "Sending..." : "Send to HubSpot"}
+                </Button>
+              </div>
+              <div style={{ marginBottom: "24px" }}>
+                <p style={{ color: "#d1d5db", marginBottom: "16px" }}>
+                  Note: You need to have contacts and companies generated first,
+                  and they need to be sent to HubSpot to get real HubSpot IDs.
+                </p>
+              </div>
+              {associations.length > 0 ? (
+                <div style={{ overflowX: "auto" }}>
+                  <table
+                    style={{
+                      minWidth: "100%",
+                      backgroundColor: "rgba(55, 65, 81, 0.8)",
+                      border: "1px solid #4b5563",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <thead style={{ backgroundColor: "rgba(75, 85, 99, 0.8)" }}>
+                      <tr>
+                        <th
+                          style={{
+                            padding: "24px",
+                            textAlign: "left",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#d1d5db",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Contact ID
+                        </th>
+                        <th
+                          style={{
+                            padding: "24px",
+                            textAlign: "left",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#d1d5db",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Company ID
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="mt-4 text-sm text-gray-600">
-                  Total associations: {associations.length}
+                    </thead>
+                    <tbody style={{ borderTop: "1px solid #4b5563" }}>
+                      {associations.map((association, index) => (
+                        <tr
+                          key={index}
+                          style={{ borderBottom: "1px solid #4b5563" }}
+                        >
+                          <td
+                            style={{
+                              padding: "24px",
+                              fontFamily: "monospace",
+                              fontSize: "14px",
+                              color: "#d1d5db",
+                            }}
+                          >
+                            {association.contactId}
+                          </td>
+                          <td
+                            style={{
+                              padding: "24px",
+                              fontFamily: "monospace",
+                              fontSize: "14px",
+                              color: "#d1d5db",
+                            }}
+                          >
+                            {association.companyId}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div
+                    style={{
+                      marginTop: "16px",
+                      fontSize: "14px",
+                      color: "#9ca3af",
+                    }}
+                  >
+                    Total associations: {associations.length}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "48px 0",
+                    color: "#9ca3af",
+                  }}
+                >
+                  {`No associations generated yet. Generate contacts and companies first, then click Generate Associations!`}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
