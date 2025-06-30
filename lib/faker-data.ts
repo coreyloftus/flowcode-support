@@ -41,7 +41,7 @@ export interface Ticket {
   hs_ticket_category: string;
   hs_ticket_owner_id: string;
   hs_pipeline: string;
-  // hs_pipeline_stage: string;
+  hs_pipeline_stage: string;
   hs_ticket_source: string;
   // hs_ticket_type: string;
 }
@@ -331,10 +331,11 @@ export function generateTicket(): Ticket {
   ]);
 
   const content = generateRealisticTicketContent(ticketType, ticketCategory);
+  const subject = generateRealisticTicketSubject(ticketType, ticketCategory);
 
   return {
     id: faker.string.uuid(),
-    subject: faker.lorem.sentence(),
+    subject: subject,
     content: content,
     hs_ticket_priority: faker.helpers.arrayElement([
       "low",
@@ -345,12 +346,7 @@ export function generateTicket(): Ticket {
     hs_ticket_category: ticketCategory,
     hs_ticket_owner_id: faker.string.numeric(6),
     hs_pipeline: "0",
-    // hs_pipeline_stage: faker.helpers.arrayElement([
-    //   "open",
-    //   "waiting_on_customer",
-    //   "waiting_on_third_party",
-    //   "closed",
-    // ]),
+    hs_pipeline_stage: "1",
     hs_ticket_source: faker.helpers.arrayElement([
       "email",
       "chat",
@@ -494,6 +490,97 @@ function generateRealisticTicketContent(
   } else {
     // Default to technical issues for technical category
     return faker.helpers.arrayElement(technicalIssues);
+  }
+}
+
+function generateRealisticTicketSubject(
+  type: string,
+  category: string
+): string {
+  const technicalSubjects = [
+    "Error logs showing connection timeout and authentication failures",
+    "Integration failing with 500 error during data sync",
+    "Dashboard showing incorrect and stale metrics",
+    "Permission denied error when accessing features",
+    "System running slowly and timing out",
+    "Duplicate records being created in database",
+    "API returning inconsistent results",
+    "SSL certificate errors when connecting",
+    "Webhook notifications not being delivered reliably",
+    "Mobile app connectivity issues on cellular networks",
+  ];
+
+  const billingSubjects = [
+    "Unexpected charge on latest invoice",
+    "Unable to update billing information",
+    "Payment failure notification despite valid payment method",
+    "Being charged for unused features",
+    "Invoice missing promised discount",
+    "Unable to cancel subscription",
+    "Duplicate charges for same service period",
+    "Pricing discrepancy between website and invoice",
+  ];
+
+  const featureRequestSubjects = [
+    "Request for analytics data export feature",
+    "Need support for custom webhooks",
+    "Request for bulk import feature for user data",
+    "Request for iOS mobile app",
+    "Request for multi-language support",
+    "Request for more granular permission controls",
+    "Request for API rate limiting feature",
+    "Request for dark mode theme",
+  ];
+
+  const generalQuestionSubjects = [
+    "Best practices for setting up first integration",
+    "Understanding subscription tier differences",
+    "API documentation clarification needed",
+    "User authentication best practices",
+    "Enterprise features implementation process",
+    "Data retention policy clarification",
+    "Training resources for team",
+    "Typical support response time expectations",
+  ];
+
+  const complaintSubjects = [
+    "No response to previous ticket for over a week",
+    "System down for 3 hours affecting business operations",
+    "Inconsistent answers from support team",
+    "Recent update broke essential features",
+    "Poor customer service experience",
+    "Pricing changes implemented without notice",
+    "System performance degradation over past month",
+    "Complicated and slow support process",
+  ];
+
+  const complimentSubjects = [
+    "Thank you for excellent support last week",
+    "New dashboard features are fantastic",
+    "Impressed with platform reliability",
+    "Documentation is very well written",
+    "Outstanding customer service team",
+    "Recent update included requested features",
+    "API is very well designed and intuitive",
+    "Appreciate responsiveness to feature requests",
+  ];
+
+  // Select subject based on type and category
+  if (type === "bug" || category === "bug_report") {
+    return faker.helpers.arrayElement(technicalSubjects);
+  } else if (category === "billing") {
+    return faker.helpers.arrayElement(billingSubjects);
+  } else if (type === "feature_request" || category === "feature_request") {
+    return faker.helpers.arrayElement(featureRequestSubjects);
+  } else if (type === "complaint") {
+    return faker.helpers.arrayElement(complaintSubjects);
+  } else if (type === "compliment") {
+    return faker.helpers.arrayElement(complimentSubjects);
+  } else if (type === "question" || category === "general") {
+    return faker.helpers.arrayElement(generalQuestionSubjects);
+  } else {
+    // Default to technical subjects for technical category
+    return faker.helpers.arrayElement(technicalSubjects);
   }
 }
 

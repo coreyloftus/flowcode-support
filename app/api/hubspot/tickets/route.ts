@@ -89,6 +89,22 @@ export async function POST(request: NextRequest) {
           `📤 Sending ticket: ${ticket.subject} (${ticket.hs_ticket_priority} priority) - Assigned to: ${randomContact.properties?.firstname} ${randomContact.properties?.lastname} (${randomContact.properties?.email})`
         );
 
+        // Log the ticket properties being sent
+        const ticketProperties = {
+          subject: ticket.subject,
+          content: ticket.content,
+          // hs_ticket_priority: ticket.hs_ticket_priority,
+          // hs_ticket_category: ticket.hs_ticket_category,
+          // hs_ticket_owner_id: ticket.hs_ticket_owner_id,
+          hs_pipeline: ticket.hs_pipeline,
+          hs_pipeline_stage: ticket.hs_pipeline_stage,
+          source_type: "EMAIL",
+        };
+
+        logs.push(
+          `📋 Ticket properties: ${JSON.stringify(ticketProperties, null, 2)}`
+        );
+
         const response = await fetch(
           "https://api.hubapi.com/crm/v3/objects/tickets",
           {
@@ -98,15 +114,7 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              properties: {
-                subject: ticket.subject,
-                content: ticket.content,
-                hs_ticket_priority: ticket.hs_ticket_priority,
-                hs_ticket_category: ticket.hs_ticket_category,
-                hs_ticket_owner_id: ticket.hs_ticket_owner_id,
-                hs_pipeline: ticket.hs_pipeline,
-                hs_ticket_source: ticket.hs_ticket_source,
-              },
+              properties: ticketProperties,
             }),
           }
         );

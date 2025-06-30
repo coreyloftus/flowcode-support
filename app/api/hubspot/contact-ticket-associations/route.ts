@@ -260,14 +260,12 @@ export async function POST() {
               Authorization: `Bearer ${apiKey}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              types: [
-                {
-                  associationCategory: "HUBSPOT_DEFINED",
-                  associationTypeId: 15, // 15 = Contact to Ticket association
-                },
-              ],
-            }),
+            body: JSON.stringify([
+              {
+                associationCategory: "HUBSPOT_DEFINED",
+                associationTypeId: 15, // 15 = Contact to Ticket association
+              },
+            ]),
           }
         );
 

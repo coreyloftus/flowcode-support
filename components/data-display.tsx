@@ -56,13 +56,13 @@ export function DataDisplay({ data, type }: DataDisplayProps) {
         {ticket.hs_ticket_category}
       </td>
       <td style={{ padding: "24px", color: "#d1d5db" }}>
-        {ticket.hs_ticket_type}
+        {ticket.hs_ticket_source}
       </td>
       <td style={{ padding: "24px", color: "#d1d5db" }}>
         {ticket.hs_pipeline_stage}
       </td>
       <td style={{ padding: "24px", color: "#d1d5db" }}>
-        {ticket.hs_ticket_source}
+        {ticket.hs_ticket_owner_id}
       </td>
     </tr>
   );
@@ -81,7 +81,14 @@ export function DataDisplay({ data, type }: DataDisplayProps) {
           "Location",
         ];
       case "tickets":
-        return ["Subject", "Priority", "Category", "Type", "Stage", "Source"];
+        return [
+          "Subject",
+          "Priority",
+          "Category",
+          "Source",
+          "Pipeline Stage",
+          "Owner ID",
+        ];
       default:
         return [];
     }
