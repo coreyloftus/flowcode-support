@@ -41,9 +41,9 @@ export interface Ticket {
   hs_ticket_category: string;
   hs_ticket_owner_id: string;
   hs_pipeline: string;
-  hs_pipeline_stage: string;
+  // hs_pipeline_stage: string;
   hs_ticket_source: string;
-  hs_ticket_type: string;
+  // hs_ticket_type: string;
 }
 
 export interface Association {
@@ -313,31 +313,44 @@ export function generateCompany(): Company {
 }
 
 export function generateTicket(): Ticket {
+  // Generate realistic ticket content based on category and type
+  const ticketType = faker.helpers.arrayElement([
+    "question",
+    "bug",
+    "feature_request",
+    "complaint",
+    "compliment",
+  ]);
+
+  const ticketCategory = faker.helpers.arrayElement([
+    "general",
+    "technical",
+    "billing",
+    "feature_request",
+    "bug_report",
+  ]);
+
+  const content = generateRealisticTicketContent(ticketType, ticketCategory);
+
   return {
     id: faker.string.uuid(),
     subject: faker.lorem.sentence(),
-    content: faker.lorem.paragraphs(2),
+    content: content,
     hs_ticket_priority: faker.helpers.arrayElement([
       "low",
       "medium",
       "high",
       "urgent",
     ]),
-    hs_ticket_category: faker.helpers.arrayElement([
-      "general",
-      "technical",
-      "billing",
-      "feature_request",
-      "bug_report",
-    ]),
+    hs_ticket_category: ticketCategory,
     hs_ticket_owner_id: faker.string.numeric(6),
     hs_pipeline: "0",
-    hs_pipeline_stage: faker.helpers.arrayElement([
-      "open",
-      "waiting_on_customer",
-      "waiting_on_third_party",
-      "closed",
-    ]),
+    // hs_pipeline_stage: faker.helpers.arrayElement([
+    //   "open",
+    //   "waiting_on_customer",
+    //   "waiting_on_third_party",
+    //   "closed",
+    // ]),
     hs_ticket_source: faker.helpers.arrayElement([
       "email",
       "chat",
@@ -345,14 +358,143 @@ export function generateTicket(): Ticket {
       "web_form",
       "social_media",
     ]),
-    hs_ticket_type: faker.helpers.arrayElement([
-      "question",
-      "bug",
-      "feature_request",
-      "complaint",
-      "compliment",
-    ]),
+    // hs_ticket_type: ticketType,
   };
+}
+
+function generateRealisticTicketContent(
+  type: string,
+  category: string
+): string {
+  const technicalIssues = [
+    "I'm experiencing persistent error logs in my UI that I can't seem to resolve. The errors show 'Connection timeout' and 'Authentication failed' messages. I've tried restarting the service and clearing the cache, but the issue persists. Can you help me troubleshoot this?",
+
+    "Our integration is failing with a 500 error when trying to sync data. I've checked the API documentation and our credentials are correct. The error occurs specifically when processing large datasets. We've tried reducing the batch size but it still fails. Any suggestions?",
+
+    "The dashboard is showing incorrect metrics and the data seems to be stale. I've refreshed the page multiple times and cleared my browser cache, but the numbers don't update. This is affecting our reporting accuracy. Please investigate.",
+
+    "I'm getting a 'Permission denied' error when trying to access certain features. I have admin privileges and this worked fine last week. I've tried logging out and back in, but the issue remains. What could be causing this?",
+
+    "The system is running very slowly and sometimes times out completely. I've monitored the server resources and they seem normal. This started happening after the latest update. Can you check if there's a known issue?",
+
+    "I'm seeing duplicate records being created in our database. This is causing data integrity issues. I've checked our sync settings and they look correct. How can we prevent this from happening?",
+
+    "The API is returning inconsistent results. Sometimes it works fine, other times it returns empty responses. I've tested with different parameters and the behavior is unpredictable. This is affecting our production environment.",
+
+    "I'm getting SSL certificate errors when trying to connect to the service. The certificate appears to be valid when I check it manually. This started happening after a recent server maintenance. Any ideas?",
+
+    "The webhook notifications are not being delivered reliably. Some events are missing and others are delayed. I've verified our endpoint is working correctly. Can you check the webhook delivery system?",
+
+    "I'm experiencing intermittent connectivity issues with the mobile app. It works fine on WiFi but fails on cellular networks. I've tested on multiple devices and carriers. Is this a known issue?",
+  ];
+
+  const billingIssues = [
+    "I noticed an unexpected charge on my latest invoice. The amount doesn't match what I was quoted. I've reviewed my usage and it seems within normal limits. Can you help me understand this charge?",
+
+    "I'm trying to update my billing information but the system won't accept my new credit card. I've verified the card details are correct and the card is active. What might be causing this issue?",
+
+    "I received a payment failure notification but my payment method is current and has sufficient funds. I've tried updating the payment method but still get the same error. Can you investigate?",
+
+    "I'm being charged for features I'm not using. I've reviewed my subscription and there are add-ons I didn't request. How can I remove these and get a refund for the unused period?",
+
+    "The invoice I received doesn't include the discount I was promised. I have the email confirmation showing the promotional rate. Can you apply the correct pricing?",
+
+    "I'm trying to cancel my subscription but the system keeps giving me an error. I've followed the cancellation process multiple times. Can you help me complete this?",
+
+    "I was charged twice for the same service period. I can see two identical charges on my statement. Can you refund the duplicate charge?",
+
+    "The pricing shown on your website doesn't match what I'm being charged. I signed up based on the advertised price but my invoice is higher. Can you explain the difference?",
+  ];
+
+  const featureRequests = [
+    "I would love to see an export feature for our analytics data. Currently, we have to manually copy the data which is time-consuming. This would be very helpful for our reporting needs.",
+
+    "Could you add support for custom webhooks? We need to integrate with our internal systems and having customizable webhook payloads would make this much easier.",
+
+    "It would be great to have a bulk import feature for user data. We're migrating from another system and manually adding hundreds of users is not practical.",
+
+    "I'd like to request a mobile app for iOS. Many of our team members work remotely and need access on their phones. The web version works but a native app would be much better.",
+
+    "Could you add multi-language support? We have international users who would benefit from localized interfaces.",
+
+    "I'd like to see more granular permission controls. Currently, users either have full access or very limited access. We need something in between.",
+
+    "Could you add an API rate limiting feature? We want to prevent abuse of our API endpoints by implementing request throttling.",
+
+    "I'd like to request a dark mode theme. Many of our users work in low-light environments and would appreciate this option.",
+  ];
+
+  const generalQuestions = [
+    "I'm new to the platform and would like to know the best practices for setting up our first integration. What should I consider before getting started?",
+
+    "Can you explain the difference between the different subscription tiers? I'm trying to choose the right plan for our needs.",
+
+    "I'm having trouble understanding the documentation for the API. Could you provide some examples of common use cases?",
+
+    "What's the recommended way to handle user authentication in our integration? I want to make sure we're following security best practices.",
+
+    "I'm interested in the enterprise features but need more information about the implementation process. What does the onboarding look like?",
+
+    "Can you help me understand the data retention policies? I need to know how long our data is stored and what happens when we cancel.",
+
+    "I'm looking for training resources for my team. Do you offer any webinars or documentation for getting up to speed quickly?",
+
+    "What's the typical response time for support requests? I want to set proper expectations with my team.",
+  ];
+
+  const complaints = [
+    "I've been waiting for a response to my previous ticket for over a week. This is unacceptable for a paid service. I need immediate assistance.",
+
+    "The system has been down for the past 3 hours and this is affecting our business operations. We're losing money every minute. When will this be resolved?",
+
+    "I've contacted support multiple times about the same issue and keep getting different answers. This is frustrating and unprofessional.",
+
+    "The recent update broke several features we rely on. We weren't notified about these changes and now our workflow is disrupted.",
+
+    "The customer service I've received has been poor. Representatives don't seem to understand our technical requirements.",
+
+    "The pricing changes were implemented without proper notice. This is a significant increase that we weren't prepared for.",
+
+    "The system performance has degraded significantly over the past month. Response times are unacceptable for a business-critical application.",
+
+    "I've been trying to get a simple question answered for days. The support process is too complicated and slow.",
+  ];
+
+  const compliments = [
+    "I just wanted to say thank you for the excellent support I received last week. The team was knowledgeable and resolved my issue quickly.",
+
+    "The new dashboard features are fantastic! They've made our workflow much more efficient. Great job on the implementation.",
+
+    "I'm really impressed with the platform's reliability. We've been using it for 6 months now and haven't experienced any downtime.",
+
+    "The documentation is very well written and easy to follow. It made our integration process much smoother than expected.",
+
+    "Your customer service team is outstanding. They always go above and beyond to help us succeed.",
+
+    "The recent update included exactly the features we were looking for. It's clear you listen to customer feedback.",
+
+    "The API is very well designed and easy to work with. Our developers love how intuitive it is.",
+
+    "I appreciate how responsive your team is to feature requests. It shows you care about your customers' needs.",
+  ];
+
+  // Select content based on type and category
+  if (type === "bug" || category === "bug_report") {
+    return faker.helpers.arrayElement(technicalIssues);
+  } else if (category === "billing") {
+    return faker.helpers.arrayElement(billingIssues);
+  } else if (type === "feature_request" || category === "feature_request") {
+    return faker.helpers.arrayElement(featureRequests);
+  } else if (type === "complaint") {
+    return faker.helpers.arrayElement(complaints);
+  } else if (type === "compliment") {
+    return faker.helpers.arrayElement(compliments);
+  } else if (type === "question" || category === "general") {
+    return faker.helpers.arrayElement(generalQuestions);
+  } else {
+    // Default to technical issues for technical category
+    return faker.helpers.arrayElement(technicalIssues);
+  }
 }
 
 export function generateContacts(count: number): Contact[] {
