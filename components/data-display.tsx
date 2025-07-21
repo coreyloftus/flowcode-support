@@ -1,11 +1,33 @@
-import { Contact, Company, Ticket } from "@/lib/faker-data";
+import {
+  Contact,
+  Company,
+  Ticket,
+  SalesforceContact,
+  SalesforceAccount,
+  SalesforceLead,
+  SalesforceOpportunity,
+} from "@/lib/faker-data";
 
 interface DataDisplayProps {
-  data: Contact[] | Company[] | Ticket[];
-  type: "contacts" | "companies" | "tickets";
+  data:
+    | Contact[]
+    | Company[]
+    | Ticket[]
+    | SalesforceContact[]
+    | SalesforceAccount[]
+    | SalesforceLead[]
+    | SalesforceOpportunity[];
+  type:
+    | "contacts"
+    | "companies"
+    | "tickets"
+    | "accounts"
+    | "leads"
+    | "opportunities";
+  crmType: "hubspot" | "salesforce";
 }
 
-export function DataDisplay({ data, type }: DataDisplayProps) {
+export function DataDisplay({ data, type, crmType }: DataDisplayProps) {
   if (data.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "32px 0", color: "#9ca3af" }}>
@@ -67,43 +89,164 @@ export function DataDisplay({ data, type }: DataDisplayProps) {
     </tr>
   );
 
+  // Salesforce rendering functions
+  const renderSalesforceContactRow = (contact: SalesforceContact) => (
+    <tr key={contact.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {contact.FirstName} {contact.LastName}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.Email}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.Title}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{contact.Phone}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {contact.MailingCity}, {contact.MailingState}
+      </td>
+    </tr>
+  );
+
+  const renderSalesforceAccountRow = (account: SalesforceAccount) => (
+    <tr key={account.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{account.Name}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{account.Website}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{account.Industry}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {account.NumberOfEmployees}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        ${account.AnnualRevenue.toLocaleString()}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {account.BillingCity}, {account.BillingState}
+      </td>
+    </tr>
+  );
+
+  const renderSalesforceLeadRow = (lead: SalesforceLead) => (
+    <tr key={lead.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {lead.FirstName} {lead.LastName}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{lead.Company}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{lead.Email}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{lead.Title}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{lead.Status}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{lead.LeadSource}</td>
+    </tr>
+  );
+
+  const renderSalesforceOpportunityRow = (
+    opportunity: SalesforceOpportunity
+  ) => (
+    <tr key={opportunity.id} style={{ borderBottom: "1px solid #4b5563" }}>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{opportunity.Name}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        ${opportunity.Amount.toLocaleString()}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {opportunity.StageName}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {opportunity.CloseDate}
+      </td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>{opportunity.Type}</td>
+      <td style={{ padding: "24px", color: "#d1d5db" }}>
+        {opportunity.Probability}%
+      </td>
+    </tr>
+  );
+
   const getHeaders = () => {
-    switch (type) {
-      case "contacts":
-        return ["Name", "Email", "Company", "Job Title", "Phone", "Location"];
-      case "companies":
-        return [
-          "Name",
-          "Domain",
-          "Industry",
-          "Employees",
-          "Annual Revenue",
-          "Location",
-        ];
-      case "tickets":
-        return [
-          "Subject",
-          "Priority",
-          "Category",
-          "Source",
-          "Pipeline Stage",
-          "Owner ID",
-        ];
-      default:
-        return [];
+    if (crmType === "hubspot") {
+      switch (type) {
+        case "contacts":
+          return ["Name", "Email", "Company", "Job Title", "Phone", "Location"];
+        case "companies":
+          return [
+            "Name",
+            "Domain",
+            "Industry",
+            "Employees",
+            "Annual Revenue",
+            "Location",
+          ];
+        case "tickets":
+          return [
+            "Subject",
+            "Priority",
+            "Category",
+            "Source",
+            "Pipeline Stage",
+            "Owner ID",
+          ];
+        default:
+          return [];
+      }
+    } else {
+      // salesforce
+      switch (type) {
+        case "contacts":
+          return ["Name", "Email", "Title", "Phone", "Location"];
+        case "accounts":
+          return [
+            "Name",
+            "Website",
+            "Industry",
+            "Employees",
+            "Annual Revenue",
+            "Location",
+          ];
+        case "leads":
+          return ["Name", "Company", "Email", "Title", "Status", "Lead Source"];
+        case "opportunities":
+          return [
+            "Name",
+            "Amount",
+            "Stage",
+            "Close Date",
+            "Type",
+            "Probability",
+          ];
+        default:
+          return [];
+      }
     }
   };
 
-  const renderRow = (item: Contact | Company | Ticket) => {
-    switch (type) {
-      case "contacts":
-        return renderContactRow(item as Contact);
-      case "companies":
-        return renderCompanyRow(item as Company);
-      case "tickets":
-        return renderTicketRow(item as Ticket);
-      default:
-        return null;
+  const renderRow = (
+    item:
+      | Contact
+      | Company
+      | Ticket
+      | SalesforceContact
+      | SalesforceAccount
+      | SalesforceLead
+      | SalesforceOpportunity
+  ) => {
+    if (crmType === "hubspot") {
+      switch (type) {
+        case "contacts":
+          return renderContactRow(item as Contact);
+        case "companies":
+          return renderCompanyRow(item as Company);
+        case "tickets":
+          return renderTicketRow(item as Ticket);
+        default:
+          return null;
+      }
+    } else {
+      // salesforce
+      switch (type) {
+        case "contacts":
+          return renderSalesforceContactRow(item as SalesforceContact);
+        case "accounts":
+          return renderSalesforceAccountRow(item as SalesforceAccount);
+        case "leads":
+          return renderSalesforceLeadRow(item as SalesforceLead);
+        case "opportunities":
+          return renderSalesforceOpportunityRow(item as SalesforceOpportunity);
+        default:
+          return null;
+      }
     }
   };
 

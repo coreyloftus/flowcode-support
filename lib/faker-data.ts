@@ -1,5 +1,63 @@
 import { faker } from "@faker-js/faker";
 
+// Helper function to format state names to abbreviations
+const formatState = (state: string) => {
+  const stateMap: Record<string, string> = {
+    Alabama: "AL",
+    Alaska: "AK",
+    Arizona: "AZ",
+    Arkansas: "AR",
+    California: "CA",
+    Colorado: "CO",
+    Connecticut: "CT",
+    Delaware: "DE",
+    Florida: "FL",
+    Georgia: "GA",
+    Hawaii: "HI",
+    Idaho: "ID",
+    Illinois: "IL",
+    Indiana: "IN",
+    Iowa: "IA",
+    Kansas: "KS",
+    Kentucky: "KY",
+    Louisiana: "LA",
+    Maine: "ME",
+    Maryland: "MD",
+    Massachusetts: "MA",
+    Michigan: "MI",
+    Minnesota: "MN",
+    Mississippi: "MS",
+    Missouri: "MO",
+    Montana: "MT",
+    Nebraska: "NE",
+    Nevada: "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    Ohio: "OH",
+    Oklahoma: "OK",
+    Oregon: "OR",
+    Pennsylvania: "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    Tennessee: "TN",
+    Texas: "TX",
+    Utah: "UT",
+    Vermont: "VT",
+    Virginia: "VA",
+    Washington: "WA",
+    "West Virginia": "WV",
+    Wisconsin: "WI",
+    Wyoming: "WY",
+  };
+
+  return stateMap[state] || state;
+};
+
 export interface Contact {
   id: string;
   email: string;
@@ -49,6 +107,68 @@ export interface Ticket {
 export interface Association {
   contactId: string;
   companyId: string;
+}
+
+// Salesforce-specific data types
+export interface SalesforceContact {
+  id: string;
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  Phone: string;
+  Title: string;
+  MailingStreet: string;
+  MailingCity: string;
+  MailingState: string;
+  MailingPostalCode: string;
+  MailingCountry: string;
+}
+
+export interface SalesforceAccount {
+  id: string;
+  Name: string;
+  Website: string;
+  Phone: string;
+  Industry: string;
+  BillingStreet: string;
+  BillingCity: string;
+  BillingState: string;
+  BillingPostalCode: string;
+  BillingCountry: string;
+  NumberOfEmployees: number;
+  AnnualRevenue: number;
+  Description: string;
+}
+
+export interface SalesforceLead {
+  id: string;
+  FirstName: string;
+  LastName: string;
+  Company: string;
+  Email: string;
+  Phone: string;
+  Title: string;
+  Industry: string;
+  Street: string;
+  City: string;
+  State: string;
+  PostalCode: string;
+  Country: string;
+  Website: string;
+  LeadSource: string;
+  Status: string;
+}
+
+export interface SalesforceOpportunity {
+  id: string;
+  Name: string;
+  Amount: number;
+  StageName: string;
+  CloseDate: string;
+  Type: string;
+  LeadSource: string;
+  Description: string;
+  Probability: number;
 }
 
 // Helper function to generate realistic domain from company name
@@ -584,6 +704,182 @@ function generateRealisticTicketSubject(
   }
 }
 
+// Salesforce data generators
+export function generateSalesforceContact(): SalesforceContact {
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const companyName = faker.helpers.arrayElement(realisticCompanyNames);
+  const domain = generateDomainFromCompanyName(companyName);
+  const email = generateEmailFromName(firstName, lastName, domain);
+
+  return {
+    id: faker.string.uuid(),
+    FirstName: firstName,
+    LastName: lastName,
+    Email: email,
+    Phone: faker.phone.number(),
+    Title: faker.person.jobTitle(),
+    MailingStreet: faker.location.streetAddress(),
+    MailingCity: faker.location.city(),
+    MailingState: formatState(faker.location.state()),
+    MailingPostalCode: faker.location.zipCode(),
+    MailingCountry: faker.location.country(),
+  };
+}
+
+export function generateSalesforceAccount(): SalesforceAccount {
+  const companyName = faker.helpers.arrayElement(realisticCompanyNames);
+  const domain = generateDomainFromCompanyName(companyName);
+
+  return {
+    id: faker.string.uuid(),
+    Name: companyName,
+    Website: `https://www.${domain}`,
+    Phone: faker.phone.number(),
+    Industry: faker.helpers.arrayElement([
+      "Technology",
+      "Healthcare",
+      "Financial Services",
+      "Manufacturing",
+      "Retail",
+      "Education",
+      "Government",
+      "Media",
+      "Transportation",
+      "Real Estate",
+      "Consulting",
+      "Energy",
+      "Telecommunications",
+      "Hospitality",
+      "Insurance",
+      "Construction",
+      "Automotive",
+      "Aerospace",
+      "Agriculture",
+      "Biotechnology",
+    ]),
+    BillingStreet: faker.location.streetAddress(),
+    BillingCity: faker.location.city(),
+    BillingState: formatState(faker.location.state()),
+    BillingPostalCode: faker.location.zipCode(),
+    BillingCountry: faker.location.country(),
+    NumberOfEmployees: faker.number.int({ min: 1, max: 10000 }),
+    AnnualRevenue: faker.number.int({ min: 10000, max: 1000000000 }),
+    Description: faker.company.catchPhrase(),
+  };
+}
+
+export function generateSalesforceLead(): SalesforceLead {
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const companyName = faker.helpers.arrayElement(realisticCompanyNames);
+  const domain = generateDomainFromCompanyName(companyName);
+  const email = generateEmailFromName(firstName, lastName, domain);
+
+  return {
+    id: faker.string.uuid(),
+    FirstName: firstName,
+    LastName: lastName,
+    Company: companyName,
+    Email: email,
+    Phone: faker.phone.number(),
+    Title: faker.person.jobTitle(),
+    Industry: faker.helpers.arrayElement([
+      "Technology",
+      "Healthcare",
+      "Financial Services",
+      "Manufacturing",
+      "Retail",
+      "Education",
+      "Government",
+      "Media",
+      "Transportation",
+      "Real Estate",
+    ]),
+    Street: faker.location.streetAddress(),
+    City: faker.location.city(),
+    State: formatState(faker.location.state()),
+    PostalCode: faker.location.zipCode(),
+    Country: faker.location.country(),
+    Website: `https://www.${domain}`,
+    LeadSource: faker.helpers.arrayElement([
+      "Web",
+      "Phone Inquiry",
+      "Partner Referral",
+      "Purchased List",
+      "Other",
+      "Advertisement",
+      "Employee Referral",
+      "External Referral",
+      "Trade Show",
+      "Web Form",
+      "Word of mouth",
+    ]),
+    Status: faker.helpers.arrayElement([
+      "Open - Not Contacted",
+      "Working - Contacted",
+      "Closed - Converted",
+      "Closed - Not Converted",
+    ]),
+  };
+}
+
+export function generateSalesforceOpportunity(): SalesforceOpportunity {
+  const companyName = faker.helpers.arrayElement(realisticCompanyNames);
+  const opportunityNames = [
+    `${companyName} - Implementation`,
+    `${companyName} - Renewal`,
+    `${companyName} - Expansion`,
+    `${companyName} - Migration`,
+    `${companyName} - Upgrade`,
+    `New Business - ${companyName}`,
+    `${companyName} - Strategic Partnership`,
+    `${companyName} - Enterprise License`,
+  ];
+
+  const stages = [
+    { name: "Prospecting", probability: 10 },
+    { name: "Qualification", probability: 25 },
+    { name: "Needs Analysis", probability: 50 },
+    { name: "Value Proposition", probability: 65 },
+    { name: "Id. Decision Makers", probability: 75 },
+    { name: "Proposal/Price Quote", probability: 85 },
+    { name: "Negotiation/Review", probability: 90 },
+    { name: "Closed Won", probability: 100 },
+    { name: "Closed Lost", probability: 0 },
+  ];
+
+  const selectedStage = faker.helpers.arrayElement(stages);
+  const closeDate = faker.date.future({ years: 1 });
+
+  return {
+    id: faker.string.uuid(),
+    Name: faker.helpers.arrayElement(opportunityNames),
+    Amount: faker.number.int({ min: 1000, max: 500000 }),
+    StageName: selectedStage.name,
+    CloseDate: closeDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+    Type: faker.helpers.arrayElement([
+      "Existing Customer - Upgrade",
+      "Existing Customer - Replacement",
+      "Existing Customer - Downgrade",
+      "New Customer",
+    ]),
+    LeadSource: faker.helpers.arrayElement([
+      "Web",
+      "Phone Inquiry",
+      "Partner Referral",
+      "Purchased List",
+      "Other",
+      "Advertisement",
+      "Employee Referral",
+      "External Referral",
+      "Trade Show",
+    ]),
+    Description: faker.lorem.sentence(),
+    Probability: selectedStage.probability,
+  };
+}
+
 export function generateContacts(count: number): Contact[] {
   return Array.from({ length: count }, () => generateContact());
 }
@@ -594,6 +890,25 @@ export function generateCompanies(count: number): Company[] {
 
 export function generateTickets(count: number): Ticket[] {
   return Array.from({ length: count }, () => generateTicket());
+}
+
+// Salesforce array generators
+export function generateSalesforceContacts(count: number): SalesforceContact[] {
+  return Array.from({ length: count }, () => generateSalesforceContact());
+}
+
+export function generateSalesforceAccounts(count: number): SalesforceAccount[] {
+  return Array.from({ length: count }, () => generateSalesforceAccount());
+}
+
+export function generateSalesforceLeads(count: number): SalesforceLead[] {
+  return Array.from({ length: count }, () => generateSalesforceLead());
+}
+
+export function generateSalesforceOpportunities(
+  count: number
+): SalesforceOpportunity[] {
+  return Array.from({ length: count }, () => generateSalesforceOpportunity());
 }
 
 export function generateAssociations(
